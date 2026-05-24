@@ -39,3 +39,11 @@ Thumbs.db
 # Misc
 .vercel
 coverage/
+
+# Local smoke-test artifacts
+build.log
+dev.log
+report.md
+.playwright-mcp/
+presenter-*.png
+voter-*.png

@@ -1,14 +1,11 @@
-export default function Home() {
-  return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
-      <div className="rounded-full border border-neutral-800 px-3 py-1 text-xs uppercase tracking-widest text-neutral-400">
-        Practically AI
-      </div>
-      <h1 className="text-4xl font-semibold leading-tight">AI Spotlight</h1>
-      <p className="text-neutral-400">
-        The vote opens when the presenter starts the segment. Hang tight — your phone will pick it up automatically.
-      </p>
-      <div className="mt-8 h-2 w-16 animate-pulse rounded-full bg-neutral-700" />
-    </main>
-  );
+import VoterApp from "@/components/VoterApp";
+import { QUESTIONS } from "@/lib/questions";
+import { getOrCreateParticipantId } from "@/lib/participant";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  // Ensures a participant cookie is set before the EventSource connects.
+  await getOrCreateParticipantId();
+  return <VoterApp questions={QUESTIONS} />;
 }
