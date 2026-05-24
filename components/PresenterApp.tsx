@@ -279,17 +279,51 @@ function TextStream({ responses }: { responses: string[] }) {
   if (responses.length === 0) {
     return <p className="text-neutral-500">Waiting for responses…</p>;
   }
+
+  // Group by normalized phrase so duplicates merge into one larger entry.
+  // Keep the first occurrence's casing for display.
+  const grouped = new Map<string, { display: string; count: number }>();
+  for (const r of responses) {
+    const key = r.toLowerCase().replace(/\s+/g, " ").trim();
+    if (!key) continue;
+    const existing = grouped.get(key);
+    if (existing) existing.count += 1;
+    else grouped.set(key, { display: r.trim(), count: 1 });
+  }
+
+  const phrases = Array.from(grouped.values()).sort((a, b) => b.count - a.count);
+  const maxCount = Math.max(1, ...phrases.map((p) => p.count));
+
+  // Curated palette — enough variation to feel alive, not so much it screams.
+  const palette = [
+    "text-neutral-100",
+    "text-emerald-300",
+    "text-sky-300",
+    "text-amber-200",
+    "text-rose-300",
+    "text-violet-300",
+  ];
+
   return (
-    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-      {responses.slice().reverse().map((r, i) => (
-        <li
-          key={i}
-          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-neutral-200"
-        >
-          {r}
-        </li>
-      ))}
-    </ul>
+    <div className="flex min-h-48 flex-wrap items-center justify-center gap-x-6 gap-y-3 px-2 py-6">
+      {phrases.map((p, i) => {
+        // sqrt scaling so a 5x phrase doesn't dwarf singletons
+        const scale = Math.sqrt(p.count / maxCount);
+        const fontSizePx = Math.round(20 + scale * 44); // 20px → 64px
+        const opacity = 0.7 + scale * 0.3;
+        const color = palette[i % palette.length];
+        return (
+          <span
+            key={p.display}
+            className={`font-semibold leading-tight ${color}`}
+            style={{ fontSize: `${fontSizePx}px`, opacity }}
+            title={p.count > 1 ? `${p.count} mentions` : undefined}
+          >
+            {p.display}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
